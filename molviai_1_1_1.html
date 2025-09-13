@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" data-theme="light">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Molvi AI</title>
+  <style>
+    :root[data-theme="light"] {
+      --bg: #fdfaf6;
+      --panel: #ffffff;
+      --soft: #f4f0e9;
+      --accent: #006a4e;
+      --accent-2: #d4af37;
+      --muted: #6c757d;
+      --text: #1a1a1a;
+      --danger:#d9534f;
+      --warning:#f0ad4e;
+      --ok:#5cb85c;
+      --border-color: #e0dcd3;
+      --header-bg: rgba(253, 250, 246, 0.85);
+      --shadow-color: rgba(0,0,0,0.05);
+    }
+    :root[data-theme="dark"] {
+      --bg: #121212;
+      --panel: #1e1e1e;
+      --soft: #2a2a2a;
+      --accent: #22c55e;
+      --accent-2: #f59e0b;
+      --muted: #94a3b8;
+      --text: #e5e7eb;
+      --danger:#ef4444;
+      --warning:#f59e0b;
+      --ok:#22c55e;
+      --border-color: #3a3a3a;
+      --header-bg: rgba(18, 18, 18, 0.85);
+      --shadow-color: rgba(0,0,0,0.25);
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font-family:'Inter', system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; transition: background-color 0.3s, color 0.3s;}
+    a{color:var(--accent)}
+    .app{display:grid;grid-template-rows:auto 1fr;min-height:100vh}
+    header{position:sticky;top:0;background:var(--header-bg); backdrop-filter:blur(8px);z-index:20;border-bottom:1px solid var(--border-color)}
+    .wrap{max-width:1100px;margin:0 auto;padding:12px 16px}
+    .brand{display:flex;align-items:center;gap:10px}
+    .brand .logo{width:36px;height:36px;border-radius:12px;background:radial-gradient(circle at 30% 30%, var(--accent), var(--accent-2));box-shadow:0 0 40px rgba(0, 106, 78, 0.2)}
+    .brand h1{margin:0;font-size:20px;letter-spacing:.4px; color: var(--text)}
+    .top-actions{display:flex;gap:8px;align-items:center}
+    .btn{background:var(--soft);border:1px solid var(--border-color);color:var(--text);padding:10px 14px;border-radius:10px;cursor:pointer;transition:.15s ease;display:inline-flex;gap:8px;align-items:center; font-weight: 500;}
+    .btn:hover{transform:translateY(-1px);box-shadow:0 6px 20px var(--shadow-color)}
+    .btn.primary{background:var(--accent);border:0;color:#fff;font-weight:600}
+    .btn.primary:hover{opacity: 0.9;}
+    .grid{display:grid;gap:16px}
+    main .grid{grid-template-columns:repeat(auto-fit,minmax(240px,1fr));padding:16px 0;}
+    .card{background:var(--panel);border:1px solid var(--border-color);border-radius:16px;padding:16px;box-shadow: 0 4px 12px var(--shadow-color); transition: background-color 0.3s, border-color 0.3s;}
+    .card h3{margin:0 0 8px 0;font-size:16px; color: var(--text)}
+    .card p{margin:0;color:var(--muted);font-size:13px; line-height: 1.5;}
+    .card .go{margin-top:12px}
+    .pill{font-size:12px;padding:4px 8px;border-radius:999px;background:var(--soft);border:1px solid var(--border-color);color:var(--muted)}
+
+    /* --- IMPROVED NAVIGATION --- */
+    .navbar { display: flex; flex-wrap: wrap; gap: 8px; padding: 12px 0 4px 0; border-top: 1px solid var(--border-color); margin-top: 12px;}
+    .nav-btn { background: transparent; padding: 8px 12px; font-size: 14px; border: 1px solid transparent; color: var(--muted); }
+    .nav-btn:hover { background: var(--soft); color: var(--text); }
+    .nav-btn.active { background: var(--accent); color: #fff; font-weight: 600; border-color: transparent; }
+
+    /* Sections */
+    section{display:none}
+    section.active{display:block}
+    section .inner{max-width:980px;margin:0 auto;padding:16px}
+    .section-title{display:flex;justify-content:space-between;align-items:center;margin:6px 0 16px 0}
+    .section-title h2{margin:0;font-size:24px; color: var(--text);}
+
+    .row{display:grid;grid-template-columns:1fr;gap:12px}
+    @media(min-width:720px){.row{grid-template-columns:1fr 1fr}}
+
+    textarea,input,select{width:100%;background:var(--soft);border:1px solid var(--border-color);color:var(--text);border-radius:12px;padding:12px;font-family:inherit}
+    textarea{min-height:120px;resize:vertical}
+    label{font-size:13px;color:var(--muted); font-weight: 500;}
+    .field{display:grid;gap:6px}
+    .actions{display:flex;gap:8px;flex-wrap:wrap}
+
+    .output{background:var(--soft);border:1px solid var(--border-color);border-radius:12px;padding:12px;min-height:80px;white-space:pre-wrap;}
+    .chip{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;font-size:12px;border:1px solid var(--border-color);background:var(--panel)}
+    .flex{display:flex;gap:12px;align-items:center}
+    .kbd{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;background:var(--soft);border:1px solid var(--border-color);border-bottom:2px solid #ccc9c2;padding:2px 6px;border-radius:6px}
+    :root[data-theme="dark"] .kbd { border-bottom: 2px solid #4a4a4a; }
+
+    /* Tasbih */
+    .tasbih-display{font-size:42px;text-align:center;font-weight:700;margin:6px 0; color: var(--accent);}
+    .tasbih-keys{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+    #tasbih-fullscreen {
+        position: fixed; inset: 0; background: var(--bg); z-index: 200; display: none;
+        flex-direction: column; align-items: center; justify-content: center; padding: 20px;
+    }
+    #tasbih-fullscreen.show { display: flex; }
+    #tasbih-fullscreen .display {
+        font-size: clamp(5rem, 25vw, 15rem); font-weight: 700; color: var(--accent);
+        cursor: pointer; flex-grow: 1; display: flex; align-items: center; justify-content: center; width: 100%; user-select: none;
+    }
+    #tasbih-fullscreen .fs-actions { position: absolute; top: 20px; right: 20px; display: flex; gap: 10px; }
+    #tasbih-fullscreen .btn { padding: 12px 18px; font-size: 1rem; }
+
+    /* Quiz */
+    .quiz-card{border:1px solid var(--border-color);border-radius:14px;padding:14px;background:var(--panel)}
+    .opt{display:block;padding:10px 12px;border:1px solid var(--border-color);border-radius:10px;margin:8px 0;cursor:pointer;transition: all 0.2s ease;}
+    .opt:hover { background-color: var(--soft); border-color: var(--accent-2); }
+    .opt.correct{border-color:var(--ok); background-color: rgba(92, 184, 92, 0.1);}
+    .opt.wrong{border-color:var(--danger); background-color: rgba(217, 83, 79, 0.1);}
+    .opt.disabled{pointer-events:none; opacity:0.7;}
+
+    /* Dua & Fiqh */
+    .dua-item, .fiqh-item { background:var(--panel); border:1px solid var(--border-color); border-radius:12px; padding:12px; margin-bottom:10px; }
+    .fiqh-q { cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+    .fiqh-a { display: none; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border-color); color: var(--muted); }
+    .fiqh-item.open .fiqh-a { display: block; }
+    .fiqh-item.open .fiqh-q span { transform: rotate(180deg); }
+    .fiqh-q span { transition: transform 0.2s ease; }
+
+    /* --- Kids Corner --- */
+    .kids-disclaimer { background: var(--soft); border: 1px solid var(--border-color); border-radius: 12px; padding: 12px; font-size: 13px; color: var(--muted); margin-bottom: 24px; }
+    .content-partition h3 { font-size: 20px; color: var(--accent); margin-top: 24px; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 2px solid var(--border-color); }
+    .story-card { cursor: pointer; transition: transform 0.2s ease, box-shadow 0.2s ease; }
+    .story-card:hover { transform: translateY(-4px); box-shadow: 0 8px 20px var(--shadow-color); }
+    .video-container {
+        position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden;
+        max-width: 100%; background: #000; border-radius: 12px; margin-top: 12px;
+    }
+    .video-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+
+    /* Footer & Modal */
+    footer{padding:24px;color:var(--muted);text-align:center; font-size: 14px;}
+    .modal{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;z-index:100}
+    .modal.show{display:flex}
+    .modal .panel{width:min(92vw,620px);background:var(--bg);border:1px solid var(--border-color);border-radius:16px;padding:20px; box-shadow: 0 10px 30px rgba(0,0,0,0.15);}
+    .modal h3 { margin: 0 0 12px 0; color: var(--text); }
+    #theme-toggle { font-size: 1.2rem; padding: 10px; }
+  </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div class="wrap">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div class="brand"> <div class="logo" aria-hidden="true"></div> <h1>Molvi AI</h1> </div>
+          <div class="top-actions">
+            <button class="btn" id="theme-toggle" title="Toggle Theme">🌙</button>
+            <button class="btn" id="btnSettings">Settings</button>
+          </div>
+        </div>
+        <nav class="navbar">
+          <button class="btn nav-btn active" data-goto="home">Home</button>
+          <button class="btn nav-btn" data-goto="chat">Molvi AI</button>
+          <button class="btn nav-btn" data-goto="prayer">Prayer & Qibla</button>
+          <button class="btn nav-btn" data-goto="quran">Quran</button>
+          <button class="btn nav-btn" data-goto="hadith">Hadith</button>
+          <button class="btn nav-btn" data-goto="dua">Dua Library</button>
+          <button class="btn nav-btn" data-goto="kids">Kids Corner</button>
+          <button class="btn nav-btn" data-goto="tools">Tools</button>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section id="home" class="active">
+        <div class="inner">
+          <p style="font-size: 1.1rem; color: var(--muted); text-align: center; margin-bottom: 24px;">As-salamu alaykum! Welcome to Molvi AI. Select a feature to get started.</p>
+          <div class="grid" style="padding: 0;">
+              <div class="card"><h3>AI Islamic Chatbot</h3><p>Your guide to Islamic queries, powered by AI.</p><div class="go"><button class="btn primary" data-goto="chat">Open</button></div></div>
+              <div class="card"><h3>Quran Search & Audio</h3><p>Fetch any surah:ayah with translation and recitation.</p><div class="go"><button class="btn primary" data-goto="quran">Open</button></div></div>
+              <div class="card"><h3>Hadith Search</h3><p>Lookup by collection and number; explain with AI.</p><div class="go"><button class="btn primary" data-goto="hadith">Open</button></div></div>
+              <div class="card"><h3>Dua Library</h3><p>A collection of essential Duas for daily life.</p><div class="go"><button class="btn primary" data-goto="dua">Open</button></div></div>
+              <div class="card"><h3>Kids Corner</h3><p>Engaging videos, stories, and quizzes for children.</p><div class="go"><button class="btn primary" data-goto="kids">Open</button></div></div>
+              <div class="card"><h3>Islamic Tools</h3><p>Access Tasbih, Zakat, Halal Checker, and more.</p><div class="go"><button class="btn primary" data-goto="tools">Open</button></div></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="chat">
+        <div class="inner">
+          <div class="section-title"><h2>AI Islamic Chatbot (Molvi AI)</h2><div class="chip">Model: Gemini 1.5 Flash</div></div>
+          <div class="row">
+            <div class="field"><label>Your Question</label><textarea id="chatInput" placeholder="Ask a question…"></textarea><div class="actions"><button class="btn primary" id="askChat">Ask</button><button class="btn" id="clearChat">Clear</button></div></div>
+            <div class="field"><label>Answer</label><div id="chatOut" class="output" aria-live="polite"></div></div>
+          </div>
+        </div>
+      </section>
+      
+      <section id="prayer">
+        <div class="inner">
+          <div class="section-title"><h2>Prayer Times & Qibla</h2><div class="chip">Source: Aladhan</div></div>
+          <div class="row"><div class="field"><label>City</label><input id="city" placeholder="Lahore" value="Lahore"/></div><div class="field"><label>Country</label><input id="country" placeholder="Pakistan" value="Pakistan"/></div></div>
+          <div class="row" style="margin-top:8px"><div class="field"><label>Calculation Method</label><select id="method"><option value="5" selected>Karachi</option><option value="2">ISNA</option><option value="1">MWL</option></select></div><div class="field"><label>Date (DD-MM-YYYY)</label><input id="date" placeholder="17-08-2025"/></div></div>
+          <div class="actions" style="margin-top:8px"><button class="btn primary" id="btnFetchPrayer">Get Timings</button><button class="btn" id="btnGetQibla">Get Qibla</button></div>
+          <div class="row" style="margin-top:10px">
+            <div class="field"><label>Timings</label><div id="prayerOut" class="output"></div></div>
+            <div class="field"><label>Qibla</label><div class="card" style="display:flex;flex-direction:column;gap:10px"><div>Angle: <span id="qiblaAngle">–</span>°</div><canvas id="compass" width="280" height="280" style="width:100%;max-width:320px;margin:auto;background:var(--soft);border-radius:50%;border:1px solid var(--border-color)"></canvas><div id="qiblaInstructions" class="muted" style="color:var(--muted);font-size:12px;text-align:center">Get Qibla to activate.</div></div></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="quran">
+        <div class="inner">
+          <div class="section-title"><h2>Quran Search & Audio</h2><div class="chip">Source: Al Quran Cloud</div></div>
+          <div class="row"><div class="field"><label>Surah (1–114)</label><input type="number" id="surah" min="1" max="114" value="1" /></div><div class="field"><label>Ayah (≥1)</label><input type="number" id="ayah" min="1" value="1" /></div></div>
+          <div class="actions" style="margin-top:8px"><button class="btn primary" id="btnFetchAyah">Fetch Ayah</button><button class="btn" id="btnExplainAyah">Explain with AI</button></div>
+          <div class="row" style="margin-top:10px">
+            <div class="field"><label>Arabic + Translation</label><div id="ayahOut" class="output"></div><audio id="ayahAudio" controls style="width:100%; margin-top:10px; display:none;"></audio></div>
+            <div class="field"><label>Explanation</label><div id="ayahExplain" class="output"></div></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="hadith">
+        <div class="inner">
+          <div class="section-title"><h2>Hadith Search</h2><div class="chip">Source: gading.dev API</div></div>
+          <div class="row"><div class="field"><label>Collection</label><select id="hadithBook"></select></div><div class="field"><label>Number (1…)</label><input id="hadithNumber" type="number" value="1" /></div></div>
+          <div class="actions" style="margin-top:8px"><button class="btn primary" id="btnFetchHadith">Fetch Hadith</button><button class="btn" id="btnExplainHadith">Explain with AI</button></div>
+          <div class="row" style="margin-top:10px">
+            <div class="field"><label>Hadith</label><div id="hadithOut" class="output"></div></div>
+            <div class="field"><label>Explanation</label><div id="hadithExplain" class="output"></div></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="dua">
+        <div class="inner">
+          <div class="section-title"><h2>Dua Library</h2></div>
+          <div id="duaList" class="output" style="max-height: 70vh; overflow-y: auto; padding: 8px; background: transparent; border: none;"></div>
+        </div>
+      </section>
+
+      <section id="kids">
+        <div class="inner">
+          <div class="section-title"><h2>Kids Corner</h2></div>
+          <div class="kids-disclaimer"><b>Disclaimer:</b> This section embeds publicly available videos from the YouTube channels mentioned below. All content belongs to the respective creators.</div>
+          
+          <div id="kidsContentArea"></div>
+          
+          <div class="content-partition" style="margin-top: 40px;"><h3>Islamic Quiz</h3></div>
+          <div class="quiz-card" style="margin-top: 16px;">
+              <div class="field"><label>Age</label><input id="quizAge" type="number" value="10"/></div>
+              <div class="actions" style="margin-top:8px;"><button class="btn primary" id="btnStartQuiz">Start Quiz</button><button class="btn" id="btnResetQuiz">Reset</button></div>
+              <div id="quizArea" style="margin-top:10px;"></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="tools">
+        <div class="inner">
+          <div class="section-title"><h2>Tools</h2></div>
+          <div class="row">
+              <div class="card"><h3>Tasbih Counter</h3><div id="tasbih-content"></div></div>
+              <div class="card"><h3>Zakat Calculator</h3><div id="zakat-content"></div></div>
+              <div class="card"><h3>Halal Food Checker</h3><div id="halal-content"></div></div>
+              <div class="card"><h3>Date Converter</h3><div id="dates-content"></div></div>
+          </div>
+           <div class="section-title" style="margin-top: 24px;"><h2>Fiqh Guide</h2></div>
+          <div id="fiqhGuide"></div>
+          <p style="text-align:center; color: var(--muted); margin-top: 16px;">If your query is not here, ask <a href="#" data-goto-link="chat">Molvi AI</a>.</p>
+        </div>
+      </section>
+      
+      <div id="original-content" style="display:none;">
+          <div id="tasbih-original">
+              <div class="tasbih-display" id="tasbihCount">0</div>
+              <div class="tasbih-keys">
+                  <button class="btn primary" id="tasbihTap">Tap</button>
+                  <button class="btn" id="tasbihReset">Reset</button>
+                  <button class="btn" id="tasbihFullscreenBtn">Fullscreen</button>
+              </div>
+              <div class="row" style="margin-top:12px"><div class="field"><label>Save current count as</label><input id="tasbihName" placeholder="e.g., SubhanAllah" /><div class="actions"><button class="btn" id="tasbihSave">Save</button></div></div><div class="field"><label>Saved Counters</label><div id="tasbihSaved" class="output"></div></div></div>
+          </div>
+          <div id="halal-original">
+              <div class="field"><label>Ingredients</label><textarea id="ingInput" placeholder="Water, Gelatin, E471…"></textarea></div>
+              <div class="actions"><button class="btn primary" id="btnCheckHalal">Check</button></div><div class="output" id="halalOut" style="margin-top:8px"></div>
+          </div>
+          <div id="zakat-original">
+              <div class="row"><div class="field"><label>Gold price/gram</label><input id="goldPrice" type="number" value="21000"/></div><div class="field"><label>Gold (grams)</label><input id="goldGrams" type="number" value="50"/></div></div>
+              <div class="row"><div class="field"><label>Silver price/gram</label><input id="silverPrice" type="number" value="250"/></div><div class="field"><label>Silver (grams)</label><input id="silverGrams" type="number" value="0"/></div></div>
+              <div class="row"><div class="field"><label>Cash & Bank</label><input id="cash" type="number" value="0"/></div><div class="field"><label>Inventory</label><input id="inventory" type="number" value="0"/></div></div>
+              <div class="row"><div class="field"><label>Debts due</label><input id="debts" type="number" value="0"/></div><div class="field"><label>Nisab basis</label><select id="nisabBasis"><option value="gold">Gold (85g)</option><option value="silver">Silver (595g)</option></select></div></div>
+              <div class="actions" style="margin-top:8px"><button class="btn primary" id="btnCalcZakat">Calculate</button></div>
+              <div id="zakatOut" class="output" style="margin-top:8px"></div>
+          </div>
+          <div id="dates-original">
+              <p>Fetches Hijri/Gregorian dates for a city when you get prayer times.</p>
+              <div id="datesOut" class="output"></div>
+          </div>
+      </div>
+    </main>
+    <footer>Made with ♥ for learning & worship. • Tip: Use Ctrl+. to open Settings.</footer>
+  </div>
+
+  <div class="modal" id="settingsModal"><div class="panel"><h3>Settings</h3><p style="margin:0 0 10px 0;color:var(--muted)">Your API key is stored only in your browser.</p><div class="field"><label>Gemini API Key</label><input id="apiKeyInput" placeholder="AIza..."/></div><div class="actions" style="margin-top:10px"><button class="btn primary" id="saveSettings">Save</button><button class="btn" id="closeSettings">Close</button></div></div></div>
+  <div class="modal" id="alertModal"><div class="panel"><p id="alertMessage" style="margin:0 0 10px 0;"></p><div class="actions" style="justify-content:flex-end;"><button class="btn primary" id="closeAlert">OK</button></div></div></div>
+  <div class="modal" id="videoModal">
+    <div class="panel">
+        <h3 id="videoTitle">Video</h3>
+        <div class="video-container"><iframe id="youtubePlayer" src="" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>
+        <div class="actions" style="margin-top:10px; justify-content:flex-end;"><button class="btn" id="closeVideo">Close</button></div>
+    </div>
+  </div>
+  <div id="tasbih-fullscreen">
+    <div class="fs-actions"><button class="btn" id="tasbihFsReset">Reset</button><button class="btn" id="tasbihFsExit">Exit</button></div>
+    <div class="display" id="tasbihFsDisplay" title="Tap to count">0</div>
+  </div>
+
+  <script>
+    const $ = s => document.querySelector(s);
+    const storage = {
+      get(k, d=null){ try{return JSON.parse(localStorage.getItem(k)) ?? d}catch{return d} },
+      set(k, v){ localStorage.setItem(k, JSON.stringify(v)); }
+    };
+
+    const alertModal = $('#alertModal');
+    $('#closeAlert').onclick = () => alertModal.classList.remove('show');
+    function showAlert(msg) { $('#alertMessage').textContent = msg; alertModal.classList.add('show'); }
+    function todayDDMMYYYY(){ const d = new Date(); return `${String(d.getDate()).padStart(2,'0')}-${String(d.getMonth()+1).padStart(2,'0')}-${d.getFullYear()}`; }
+
+    // Theme Switcher
+    const themeToggle = $('#theme-toggle');
+    const docEl = document.documentElement;
+    function applyTheme(theme) { docEl.setAttribute('data-theme', theme); themeToggle.textContent = theme === 'dark' ? '☀️' : '🌙'; storage.set('appTheme', theme); }
+    themeToggle.onclick = () => { applyTheme(docEl.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'); };
+    applyTheme(storage.get('appTheme', 'light'));
+
+    // Router
+    function goto(id){
+      document.querySelectorAll('section').forEach(s=>s.classList.remove('active'));
+      $(`#${id}`)?.classList.add('active');
+      document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+      $(`[data-goto="${id}"]`)?.classList.add('active');
+      window.scrollTo({top:0,behavior:'smooth'});
+    }
+    document.querySelectorAll('[data-goto]').forEach(b=>b.addEventListener('click',()=>goto(b.dataset.goto)));
+    document.body.addEventListener('click', e => { const link = e.target.closest('[data-goto-link]'); if (link) { e.preventDefault(); goto(link.dataset.gotoLink); }});
+
+    // Settings Modal
+    const settingsModal = $('#settingsModal');
+    $('#btnSettings').onclick = ()=>{ $('#apiKeyInput').value = storage.get('GEMINI_KEY','')||''; settingsModal.classList.add('show'); };
+    $('#closeSettings').onclick = ()=> settingsModal.classList.remove('show');
+    $('#saveSettings').onclick = ()=>{ storage.set('GEMINI_KEY', $('#apiKeyInput').value.trim()); settingsModal.classList.remove('show'); showAlert('Settings saved.'); };
+
+    // Gemini Client
+    async function gemini(prompt){
+      const key = storage.get('GEMINI_KEY','');
+      const sys = "You are an Islamic chatbot named Molvi AI. Provide concise, clear answers based on authentic Islamic sources. Avoid symbols and excessive formatting.";
+      if(!key){ return "[Demo Mode] Please add your Gemini API key in Settings for AI answers."; }
+      try{
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${encodeURIComponent(key)}`,{ method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ contents: [{ role: "user", parts: [{ text: `${sys}\n\n${prompt}` }]}] }) });
+        if(!res.ok) throw new Error('HTTP '+res.status);
+        const data = await res.json();
+        return data?.candidates?.[0]?.content?.parts?.[0]?.text.replace(/[\*`_>#~]/g,'') || 'No response.';
+      }catch(e){ return "[AI Error] " + e.message; }
+    }
+    async function geminiExplain(topic, text){ return gemini(`Explain this ${topic} in a simple way:\n\n${text}`); }
+    async function geminiQuiz(age){
+      const prompt = `Make a ${age}-appropriate Islamic quiz of 10 multiple-choice questions. Reply ONLY in clean JSON format: {"questions": [{"q": "...", "options": ["...", "...", "..."], "answer": index}]}. Do not use markdown.`;
+      const raw = await gemini(prompt);
+      try { return JSON.parse(raw.match(/\{[\s\S]*\}/)[0]); }
+      catch(e) { showAlert("Quiz generation failed. Using built-in questions."); return {questions:[{q:"How many daily prayers in Islam?", options:["Three","Five","Seven"], answer:1}]}; }
+    }
+    $('#askChat').onclick = async ()=>{ const q = $('#chatInput').value.trim(); if(q) { $('#chatOut').textContent = 'Thinking…'; $('#chatOut').textContent = await gemini(q); }};
+    $('#clearChat').onclick = ()=>{ $('#chatInput').value=''; $('#chatOut').textContent=''; };
+
+    // Quran
+    async function fetchAyah(s, a){
+      try{
+        const [arRes, enRes, audRes] = await Promise.all([ `https://api.alquran.cloud/v1/ayah/${s}:${a}`, `https://api.alquran.cloud/v1/ayah/${s}:${a}/en.asad`, `https://api.alquran.cloud/v1/ayah/${s}:${a}/ar.alafasy`].map(url=>fetch(url)));
+        const arj = await arRes.json(), enj = await enRes.json(), audj = await audRes.json();
+        return { ar: arj.data.text, en: enj.data.text, audio: audj.data.audio, ref: `${s}:${a}` };
+      }catch(e){ return {error:true, message:e.message}; }
+    }
+    $('#btnFetchAyah').onclick = async ()=>{
+      const s = +$('#surah').value, a = +$('#ayah').value;
+      $('#ayahOut').textContent = 'Loading…'; $('#ayahExplain').textContent=''; $('#ayahAudio').style.display = 'none';
+      const data = await fetchAyah(s,a);
+      if(data.error){ $('#ayahOut').textContent = '[Error] '+data.message; return; }
+      $('#ayahOut').innerHTML = `<b>${data.ref}</b>\n\n<span style="font-size: 1.2rem; line-height: 1.8;">${data.ar}</span>\n\n${data.en}`;
+      if(data.audio) { $('#ayahAudio').src = data.audio; $('#ayahAudio').style.display = 'block'; }
+    };
+    $('#btnExplainAyah').onclick = async ()=>{ const text = $('#ayahOut').textContent.trim(); if(text){ $('#ayahExplain').textContent = 'Thinking…'; $('#ayahExplain').textContent = await geminiExplain('ayat', text); }};
+
+    // Hadith
+    async function populateHadithBooks() { try { const res = await fetch('https://api.hadith.gading.dev/books'); const books = await res.json(); $('#hadithBook').innerHTML = books.data.map(b => `<option value="${b.id}">${b.name} (${b.available})</option>`).join(''); } catch (e) { showAlert(e.message); } }
+    $('#btnFetchHadith').onclick = async ()=>{
+      const b = $('#hadithBook').value, n = +$('#hadithNumber').value;
+      $('#hadithOut').textContent = 'Loading…'; $('#hadithExplain').textContent='';
+      try{
+        const res = await fetch(`https://api.hadith.gading.dev/books/${b}/${n}`);
+        const { data } = await res.json();
+        $('#hadithOut').innerHTML = `<b>${data.name} #${data.contents.number}</b>\n\n${data.contents.arab}\n\n${data.contents.id}`;
+      }catch(e){ $('#hadithOut').textContent = '[Error] Hadith not found.'; }
+    };
+    $('#btnExplainHadith').onclick = async ()=>{ const text = $('#hadithOut').textContent.trim(); if(text && !text.startsWith('[')){ $('#hadithExplain').textContent = 'Thinking…'; $('#hadithExplain').textContent = await geminiExplain('hadith', text); }};
+
+    // Tasbih
+    let tasbih = 0;
+    const updateTasbih = () => { $('#tasbihCount').textContent = tasbih; $('#tasbihFsDisplay').textContent = tasbih; };
+    const renderSaved = ()=>{
+      const saved = storage.get('tasbihSaved', []);
+      $('#tasbihSaved').innerHTML = saved.map((s,i)=>`<div class="flex"><span class="kbd">${s.name}</span><span>${s.count}</span><button class="btn" data-load="${i}">Load</button><button class="btn" data-del="${i}">X</button></div>`).join('') || 'No saved counters.';
+      document.querySelectorAll('[data-load]').forEach(b=>b.onclick=()=>{ tasbih=saved[+b.dataset.load].count; updateTasbih(); });
+      document.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{ const arr=saved; arr.splice(+b.dataset.del,1); storage.set('tasbihSaved',arr); renderSaved(); });
+    }
+    $('#tasbihTap').onclick = ()=>{ tasbih++; updateTasbih(); };
+    $('#tasbihReset').onclick = ()=>{ tasbih = 0; updateTasbih(); };
+    $('#tasbihSave').onclick = () => { const n = $('#tasbihName').value.trim()||'Counter'; const arr = storage.get('tasbihSaved',[]); arr.push({name:n, count:tasbih}); storage.set('tasbihSaved', arr); renderSaved(); };
+    $('#tasbihFullscreenBtn').onclick = () => $('#tasbih-fullscreen').classList.add('show');
+    $('#tasbihFsExit').onclick = () => $('#tasbih-fullscreen').classList.remove('show');
+    $('#tasbihFsReset').onclick = ()=>{ tasbih = 0; updateTasbih(); };
+    $('#tasbihFsDisplay').onclick = ()=>{ tasbih++; updateTasbih(); };
+
+    // Prayer/Qibla
+    $('#date').value = todayDDMMYYYY();
+    $('#btnFetchPrayer').onclick = async ()=>{
+      const city = $('#city').value, country = $('#country').value, method = $('#method').value, date = $('#date').value;
+      $('#prayerOut').textContent='Loading…'; $('#datesOut').textContent='';
+      try{
+        const res = await fetch(`https://api.aladhan.com/v1/timingsByCity/${date}?city=${city}&country=${country}&method=${method}`);
+        const {data} = await res.json();
+        $('#prayerOut').innerHTML = Object.entries(data.timings).map(([k,v])=>`<div class="flex" style="justify-content: space-between; padding: 4px 0;"><span class="kbd">${k}</span><b>${v}</b></div>`).join('');
+        $('#datesOut').innerHTML = `<div class="flex"><span class="kbd">Gregorian</span> ${data.date.gregorian.date}</div>\n<div class="flex"><span class="kbd">Hijri</span> ${data.date.hijri.date}</div>`;
+      }catch(e){ $('#prayerOut').textContent='[Error] Could not fetch timings.'; }
+    };
+    $('#btnGetQibla').onclick = async ()=>{
+      $('#qiblaInstructions').textContent = 'Getting location...';
+      try {
+        const {coords} = await new Promise((res, rej) => navigator.geolocation.getCurrentPosition(res, rej));
+        const qiblaRes = await fetch(`https://api.aladhan.com/v1/qibla/${coords.latitude}/${coords.longitude}`);
+        const {data} = await qiblaRes.json();
+        const qiblaBearing = Math.round(data.direction);
+        $('#qiblaAngle').textContent = qiblaBearing;
+        $('#qiblaInstructions').textContent = 'Rotate device to align with North.';
+        if ('DeviceOrientationEvent' in window) window.addEventListener('deviceorientation', (e) => drawCompass(e.webkitCompassHeading || (360 - e.alpha), qiblaBearing)); else $('#qiblaInstructions').textContent = 'Compass not supported.';
+      } catch(e) { $('#qiblaInstructions').textContent = e.message; }
+    };
+    function drawCompass(heading=0, qiblaBearing=0){
+      const ctx = $('#compass').getContext('2d'), C=140; ctx.clearRect(0,0,280,280);
+      ctx.beginPath(); ctx.arc(C,C,C-8,0,Math.PI*2); ctx.strokeStyle='var(--border-color)'; ctx.lineWidth=8; ctx.stroke();
+      ctx.save(); ctx.translate(C,C); ctx.rotate(-heading*Math.PI/180);
+      ctx.textAlign='center'; ctx.font='bold 18px system-ui'; ctx.fillStyle = 'var(--text)'; ctx.fillText('N', 0, -(C-25));
+      ctx.restore(); const angle=(qiblaBearing-heading)*Math.PI/180;
+      ctx.save(); ctx.translate(C,C); ctx.rotate(angle); ctx.beginPath(); ctx.moveTo(0,-C+15); ctx.lineTo(12,-C+40); ctx.lineTo(-12,-C+40); ctx.closePath(); ctx.fillStyle='var(--accent)'; ctx.fill(); ctx.restore();
+    }
+
+    // Kids Content
+    const kidsContent = {
+      zillNoorain: {
+        title: "Stories of the Prophets by Zill Noorain Kids",
+        videos: [
+          { title: "Prophet Muhammad (ﷺ)", videoId: "FWTQnAoEBkA" },
+          { title: "Prophet Ibrahim (AS)", videoId: "_1tjeGGoNXY" },
+          { title: "Prophet Musa (AS)", videoId: "CcWn2E8CcPU" },
+          { title: "Prophet Isa (AS)", videoId: "ucrzXoshU9I" },
+          { title: "Prophet Nuh (AS)", videoId: "d9Ylndv5M8w" },
+          { title: "Prophet Sulaiman (AS)", videoId: "tRkAqR8iRNU" },
+          { title: "Prophet Yunus (AS)", videoId: "UvOpQRpWqmU" },
+        ]
+      },
+      oneIslam: {
+        title: "Nasheeds & Lessons by One Islam Productions",
+        videos: [
+          { title: "The 5 Pillars of Islam", videoId: "e-pS_3Aw_oI" },
+          { title: "The Story of Zamzam Water", videoId: "x0A-GCj22gY" },
+          { title: "The 99 Names of Allah (Nasheed)", videoId: "q9e_a2czlV0" },
+          { title: "The Arabic Alphabet (Nasheed)", videoId: "84-m5s42Q8U" },
+        ]
+      },
+      freeQuranEducation: {
+        title: "'I Am The Best Muslim' Series by FreeQuranEducation",
+        videos: [
+          { title: "Episode 1: I Love Allah", videoId: "SRs_t2F-5yU" },
+          { title: "Episode 2: I Love Prophet Muhammad", videoId: "9o4S1TdBp5c" },
+          { title: "Episode 3: I am a Muslim", videoId: "Fk3-JqBYL2U" },
+          { title: "Episode 4: I Read the Quran", videoId: "I_kC83lR4-M" },
+        ]
+      }
+    };
+
+    function loadKidsContent() {
+      const area = $('#kidsContentArea');
+      area.innerHTML = Object.values(kidsContent).map(channel => `
+        <div class="content-partition">
+          <h3>${channel.title}</h3>
+          <div class="grid">
+            ${channel.videos.map(video => `
+              <div class="card story-card" data-video-id="${video.videoId}" data-title="${video.title}">
+                <h4>${video.title}</h4>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    const videoModal = $('#videoModal');
+    document.body.addEventListener('click', e => {
+        const card = e.target.closest('.story-card');
+        if (card) {
+            $('#videoTitle').textContent = card.dataset.title;
+            $('#youtubePlayer').src = `https://www.youtube.com/embed/${card.dataset.videoId}?autoplay=1&rel=0`;
+            videoModal.classList.add('show');
+        }
+    });
+    $('#closeVideo').onclick = () => { videoModal.classList.remove('show'); $('#youtubePlayer').src = ''; };
+
+    // Initialize App
+    function init() {
+        $('#tasbih-content').appendChild($('#tasbih-original'));
+        $('#zakat-content').appendChild($('#zakat-original'));
+        $('#halal-content').appendChild($('#halal-original'));
+        $('#dates-content').appendChild($('#dates-original'));
+
+        populateHadithBooks();
+        renderSaved(); updateTasbih(); drawCompass();
+        loadKidsContent();
+        
+        $('#btnFetchPrayer').click();
+    }
+    init();
+    document.addEventListener('keydown', (e)=>{ if(e.key==='.'&&(e.ctrlKey||e.metaKey)) $('#btnSettings').click(); });
+  </script>
+</body>
+</html>
+
